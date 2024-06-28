@@ -53,7 +53,7 @@ esp32_ble_tracker:
 # Define the iBeacon to track
 binary_sensor:
   - platform: ble_presence
-    mac_address: "FF:06:04:18:08:75"
+    mac_address: "xx:xx:xx:xx:xx:xx"
     name: "Dog Tag Presence"
     id: dog_tag_presence
 
@@ -71,7 +71,7 @@ binary_sensor:
 # RSSI sensor
 sensor:
   - platform: ble_rssi
-    mac_address: "FF:06:04:18:08:75"
+    mac_address: "xx:xx:xx:xx:xx:xx"
     name: "Dog Tag RSSI"
     id: dog_tag_rssi
     filters:
