@@ -1,5 +1,5 @@
 # Dog Door Automation with ESPHome
-Turn the PetSafe Electronic Pet Door to a Home Assistant smart door
+Turn the PetSafe Electronic Pet Door to a Home Assistant smart door.
 This project automates a dog door using an ESP32 microcontroller with ESPHome firmware. It leverages Bluetooth Low Energy (BLE) tracking to detect a dog tag, controls a motor to open/close the door, and integrates with Home Assistant for easy monitoring and control.
 
 ## Components
@@ -158,6 +158,7 @@ Follow the ESPHome installation guide.
 2. Compile and Upload Firmware:
 
 ```esphome run dog_door.yaml```
+
 Follow the prompts to upload the firmware to your ESP32 device.
 
 ## Home Assistant Integration
@@ -187,8 +188,21 @@ Check the ESPHome logs for detailed debugging information:
 
 ```esphome logs dog_door.yaml```
 
+## Future Planned
+1. Pairing with the Aqara presence sensor
+2. Home Assistant Automations
+
+## Parts List
+1. https://www.amazon.com/dp/B000WJ0IGA
+2. https://www.amazon.com/dp/B0CLYBPGP9?psc=1
+3. https://www.amazon.com/dp/B08246MCL5?psc=1
+4. https://www.amazon.com/dp/B0D5C5R76T?psc=1
+5. Motor and Switch from the dog door
+
+
 ## Contributing
 Contributions are welcome!
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
+
