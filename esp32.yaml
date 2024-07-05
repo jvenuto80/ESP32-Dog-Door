@@ -52,7 +52,7 @@ esp32_ble_tracker:
 
 binary_sensor:
   - platform: ble_presence
-    mac_address: "DD:34:02:0A:47:D2"
+    mac_address: "XX:XX:XX:XX:XX:XX"
     name: "Dog Tag Presence"
   - platform: gpio
     pin: 
@@ -67,7 +67,7 @@ binary_sensor:
 
 sensor:
   - platform: ble_rssi
-    mac_address: "DD:34:02:0A:47:D2"
+    mac_address: "XX:XX:XX:XX:XX:XX"
     name: "Dog Tag RSSI"
 
   - platform: adc
