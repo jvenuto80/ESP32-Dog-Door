@@ -1,0 +1,28 @@
+alias: Open door when dog tag is detected
+description: ""
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.esphome_web_315e34_dog_tag_rssi
+    above: -50
+condition:
+  - condition: and
+    conditions:
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: switch.esphome_web_315e34_prevent_dog_door_opening
+            state: "on"
+      - condition: state
+        entity_id: cover.esphome_web_315e34_dog_door
+        state: closed
+action:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.esphome_web_315e34_dog_door
+  - service: logbook.log
+    data:
+      message: Opening dog door due to tag presence based on RSSI
+      entity_id: cover.esphome_web_315e34_dog_door
+      name: Dog Door Opened
