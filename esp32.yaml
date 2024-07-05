@@ -1,5 +1,5 @@
 substitutions:
-  name: esphome-web-315e34
+  name: "dog-door"
   friendly_name: dog-door
 
 esphome:
@@ -43,20 +43,17 @@ esp32_improv:
 
 web_server:
 
-# BLE tracker configuration with increased scan frequency
+# BLE tracker for dog tag
 esp32_ble_tracker:
   scan_parameters:
-    interval: 100ms  # Increase scan frequency by decreasing interval
-    window: 100ms    # Increase active scan time by matching window to interval
+    interval: 100ms
+    window: 100ms
     active: true
 
-# Define the iBeacon to track
 binary_sensor:
   - platform: ble_presence
-    mac_address: "xx:xx:xx:xx:xx:xx"
+    mac_address: "DD:34:02:0A:47:D2"
     name: "Dog Tag Presence"
-    id: dog_tag_presence
-
   - platform: gpio
     pin: 
       number: GPIO5
@@ -68,52 +65,95 @@ binary_sensor:
       - delayed_on: 50ms
       - delayed_off: 50ms
 
-# RSSI sensor
 sensor:
   - platform: ble_rssi
-    mac_address: "xx:xx:xx:xx:xx:xx"
+    mac_address: "DD:34:02:0A:47:D2"
     name: "Dog Tag RSSI"
-    id: dog_tag_rssi
-    filters:
-      - sliding_window_moving_average:
-          window_size: 5
-          send_every: 1
-      - throttle: 1s  # Reduce throttle time to allow more frequent updates
-    on_value:
-      then:
-        - logger.log:
-            format: "Dog Tag RSSI updated: %.1f dBm"
-            args: ["x"]
 
-# GPIO for motor control
+  - platform: adc
+    pin: GPIO35
+    name: "Battery Voltage"
+    id: battery_voltage
+    update_interval: 600s
+    attenuation: 11db
+    filters:
+      - multiply: 3.01538461
+
+  - platform: template
+    name: "Battery Percentage"
+    lambda: |-
+      float voltage = id(battery_voltage).state;
+      if (voltage >= 4.2) return 100.0;
+      if (voltage <= 3.0) return 0.0;
+      return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
+    update_interval: 300s
+    unit_of_measurement: "%"
+    accuracy_decimals: 1
+    
+
+# Motor control
+output:
+  - platform: gpio
+    pin: GPIO12
+    id: motor_direction1
+  - platform: gpio
+    pin: GPIO13
+    id: motor_direction2
+  - platform: ledc
+    pin: GPIO14
+    id: motor_enable
+    frequency: 2000Hz
+
+fan:
+  - platform: speed
+    output: motor_enable
+    name: "Dog Door Motor"
+    id: dog_door_motor
+    speed_count: 2
+
+# Dog door cover
 cover:
   - platform: template
     name: "Dog Door"
     device_class: gate
     open_action:
-      - switch.turn_on: dog_door_motor
+      - if:
+          condition:
+            switch.is_off: prevent_opening
+          then:
+            - output.turn_on: motor_direction1
+            - output.turn_off: motor_direction2
+            - fan.turn_on:
+                id: dog_door_motor
+                speed: 2
+          else:
+            - logger.log: "Door opening prevented by switch"
     close_action:
-      - switch.turn_off: dog_door_motor
+      - output.turn_off: motor_direction1
+      - output.turn_on: motor_direction2
+      - fan.turn_on:
+          id: dog_door_motor
+          speed: 2
     stop_action:
-      - switch.turn_off: dog_door_motor
-    optimistic: false
-    assumed_state: false
+      - fan.turn_off: dog_door_motor
+      - output.turn_off: motor_direction1
+      - output.turn_off: motor_direction2
     lambda: |-
-      if (id(door_state_sensor).state) {
+      if (id(prevent_opening).state && id(door_state_sensor).state) {
+        return COVER_OPEN;
+      } else if (id(door_state_sensor).state) {
         return COVER_OPEN;
       } else {
         return COVER_CLOSED;
       }
 
-# Motor control
+# Prevent door opening switch
 switch:
-  - platform: gpio
-    pin: GPIO12
-    id: dog_door_motor
-    internal: true
-
-  # Override switch to prevent door opening
   - platform: template
     name: "Prevent Dog Door Opening"
     id: prevent_opening
     optimistic: true
+    turn_on_action:
+      - logger.log: "Dog door opening prevention enabled"
+    turn_off_action:
+      - logger.log: "Dog door opening prevention disabled"
