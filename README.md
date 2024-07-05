@@ -78,13 +78,15 @@ Once installed and configured:
 2. ~~Home Assistant Automations~~ Added to Automations folder
 
 ## Parts List
-1. https://www.amazon.com/dp/B000WJ0IGA PetSafe Dogdoor
-2. https://www.amazon.com/dp/B0CLYBPGP9?psc=1 L298N Motor DC Stepper Motor Driver
-3. https://www.amazon.com/dp/B08246MCL5?psc=1 ESP-WROOM-32 Development Board
-4. https://www.amazon.com/dp/B0D5C5R76T?psc=1 Blue Charm Beacons
-5. https://www.amazon.com/dp/B07QDXVRJ8?psc=1 20K ohm Resistor
-6. https://www.amazon.com/dp/B08QRJZ82J?psc=1 10K ohm Resistor
-7. Motor and Switch from the dog door
+1. [PetSafe Dogdoor](https://www.amazon.com/dp/B000WJ0IGA) 
+2. [L298N Motor DC Stepper Motor Driver](https://www.amazon.com/dp/B0CLYBPGP9?psc=1)
+3. [ESP-WROOM-32 Development Board](https://www.amazon.com/dp/B08246MCL5?psc=1)
+4. [Blue Charm Beacon](https://www.amazon.com/dp/B0D5C5R76T?psc=1)
+5. [20K ohm Resistor](https://www.amazon.com/dp/B07QDXVRJ8?psc=1)
+6. [10K ohm Resistor](https://www.amazon.com/dp/B08QRJZ82J?psc=1)
+7. [MT3608 DC-DC Step Up Boost Power Converter set to 5v](https://www.amazon.com/gp/product/B089JYBF25/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8)
+8. [TP4056 Type-c USB 5V 1A Battery Charger Module](https://www.amazon.com/gp/product/B0B3Z5VV3N/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1)
+9. Motor and Switch from the dog door
 
 
 ## Contributing
