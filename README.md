@@ -43,7 +43,7 @@ Create a file named `dog_door.yaml` with the following configuration:
 
 ```yaml
 substitutions:
-  name: esphome-web-315e34
+  name: "dog-door"
   friendly_name: dog-door
 
 esphome:
@@ -60,28 +60,34 @@ esp32:
   framework:
     type: arduino
 
+# Enable logging with reduced verbosity
 logger:
   level: INFO
   logs:
     esp32_ble_tracker: INFO
     ble_client: INFO
 
+# Enable Home Assistant API
 api:
 
+# Allow Over-The-Air updates
 ota:
   platform: esphome
 
+# Allow provisioning Wi-Fi via serial
 improv_serial:
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
+# Sets up Bluetooth LE for provisioning
 esp32_improv:
   authorizer: none
 
 web_server:
 
+# BLE tracker for dog tag
 esp32_ble_tracker:
   scan_parameters:
     interval: 100ms
@@ -90,10 +96,8 @@ esp32_ble_tracker:
 
 binary_sensor:
   - platform: ble_presence
-    mac_address: "xx:xx:xx:xx:xx:xx"
+    mac_address: "DD:34:02:0A:47:D2"
     name: "Dog Tag Presence"
-    id: dog_tag_presence
-
   - platform: gpio
     pin: 
       number: GPIO5
@@ -107,49 +111,96 @@ binary_sensor:
 
 sensor:
   - platform: ble_rssi
-    mac_address: "xx:xx:xx:xx:xx:xx"
+    mac_address: "DD:34:02:0A:47:D2"
     name: "Dog Tag RSSI"
-    id: dog_tag_rssi
-    filters:
-      - sliding_window_moving_average:
-          window_size: 5
-          send_every: 1
-      - throttle: 1s
-    on_value:
-      then:
-        - logger.log:
-            format: "Dog Tag RSSI updated: %.1f dBm"
-            args: ["x"]
 
+  - platform: adc
+    pin: GPIO35
+    name: "Battery Voltage"
+    id: battery_voltage
+    update_interval: 600s
+    attenuation: 11db
+    filters:
+      - multiply: 3.01538461
+
+  - platform: template
+    name: "Battery Percentage"
+    lambda: |-
+      float voltage = id(battery_voltage).state;
+      if (voltage >= 4.2) return 100.0;
+      if (voltage <= 3.0) return 0.0;
+      return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
+    update_interval: 300s
+    unit_of_measurement: "%"
+    accuracy_decimals: 1
+    
+
+# Motor control
+output:
+  - platform: gpio
+    pin: GPIO12
+    id: motor_direction1
+  - platform: gpio
+    pin: GPIO13
+    id: motor_direction2
+  - platform: ledc
+    pin: GPIO14
+    id: motor_enable
+    frequency: 2000Hz
+
+fan:
+  - platform: speed
+    output: motor_enable
+    name: "Dog Door Motor"
+    id: dog_door_motor
+    speed_count: 2
+
+# Dog door cover
 cover:
   - platform: template
     name: "Dog Door"
     device_class: gate
     open_action:
-      - switch.turn_on: dog_door_motor
+      - if:
+          condition:
+            switch.is_off: prevent_opening
+          then:
+            - output.turn_on: motor_direction1
+            - output.turn_off: motor_direction2
+            - fan.turn_on:
+                id: dog_door_motor
+                speed: 2
+          else:
+            - logger.log: "Door opening prevented by switch"
     close_action:
-      - switch.turn_off: dog_door_motor
+      - output.turn_off: motor_direction1
+      - output.turn_on: motor_direction2
+      - fan.turn_on:
+          id: dog_door_motor
+          speed: 2
     stop_action:
-      - switch.turn_off: dog_door_motor
-    optimistic: false
-    assumed_state: false
+      - fan.turn_off: dog_door_motor
+      - output.turn_off: motor_direction1
+      - output.turn_off: motor_direction2
     lambda: |-
-      if (id(door_state_sensor).state) {
+      if (id(prevent_opening).state && id(door_state_sensor).state) {
+        return COVER_OPEN;
+      } else if (id(door_state_sensor).state) {
         return COVER_OPEN;
       } else {
         return COVER_CLOSED;
       }
 
+# Prevent door opening switch
 switch:
-  - platform: gpio
-    pin: GPIO12
-    id: dog_door_motor
-    internal: true
-
   - platform: template
     name: "Prevent Dog Door Opening"
     id: prevent_opening
     optimistic: true
+    turn_on_action:
+      - logger.log: "Dog door opening prevention enabled"
+    turn_off_action:
+      - logger.log: "Dog door opening prevention disabled"
 ```
 ## Deploying Configuration
 1. Install ESPHome:
@@ -193,11 +244,13 @@ Check the ESPHome logs for detailed debugging information:
 2. Home Assistant Automations
 
 ## Parts List
-1. https://www.amazon.com/dp/B000WJ0IGA
-2. https://www.amazon.com/dp/B0CLYBPGP9?psc=1
-3. https://www.amazon.com/dp/B08246MCL5?psc=1
-4. https://www.amazon.com/dp/B0D5C5R76T?psc=1
-5. Motor and Switch from the dog door
+1. https://www.amazon.com/dp/B000WJ0IGA PetSafe Dogdoor
+2. https://www.amazon.com/dp/B0CLYBPGP9?psc=1 L298N Motor DC Stepper Motor Driver
+3. https://www.amazon.com/dp/B08246MCL5?psc=1 ESP-WROOM-32 Development Board
+4. https://www.amazon.com/dp/B0D5C5R76T?psc=1 Blue Charm Beacons
+5. https://www.amazon.com/dp/B07QDXVRJ8?psc=1 20K ohm Resistor
+6. https://www.amazon.com/dp/B08QRJZ82J?psc=1 10K ohm Resistor
+7. Motor and Switch from the dog door
 
 
 ## Contributing
