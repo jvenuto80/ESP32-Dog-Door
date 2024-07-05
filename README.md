@@ -75,7 +75,7 @@ Once installed and configured:
 
 ## Future Planned
 1. Pairing with the Aqara presence sensor
-2. Home Assistant Automations
+2. ~~Home Assistant Automations~~ Added to Automations folder
 
 ## Parts List
 1. https://www.amazon.com/dp/B000WJ0IGA PetSafe Dogdoor
