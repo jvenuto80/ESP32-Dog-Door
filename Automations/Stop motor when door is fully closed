@@ -1,0 +1,17 @@
+alias: Stop motor when door is fully closed
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.esphome_web_315e34_dog_door_state
+    to: "off"
+action:
+  - service: fan.turn_off
+    target:
+      entity_id: fan.esphome_web_315e34_dog_door_motor
+    data: {}
+  - service: logbook.log
+    data:
+      message: Door fully closed, stopping motor
+      entity_id: fan.esphome_web_315e34_dog_door_motor
+      name: Motor Stopped
