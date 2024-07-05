@@ -1,0 +1,14 @@
+alias: Notify Low Battery Level Dog-door
+description: Notify when the battery level drops below a threshold
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.dog_door_battery_percentage
+    below: 20
+condition: []
+action:
+  - service: notify.mobile_app_sm_s928u1
+    data:
+      title: Dog door battery level low.
+      message: Recharge or replace battery
+mode: single
