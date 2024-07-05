@@ -1,0 +1,22 @@
+alias: Close door when dog tag is absent
+description: ""
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.esphome_web_315e34_dog_tag_rssi
+    below: -50
+condition:
+  - condition: state
+    entity_id: binary_sensor.esphome_web_315e34_dog_door_state
+    state: "on"
+action:
+  - service: cover.close_cover
+    target:
+      entity_id:
+        - cover.esphome_web_315e34_dog_door
+    data: {}
+  - service: logbook.log
+    data:
+      message: Closing dog door due to tag absence
+      entity_id: cover.esphome_web_315e34_dog_door
+      name: Dog Door Closed
